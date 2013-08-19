@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
-# TODO: wget do arquivo RelatorioServidores.xls
-
+wget "http://transparencia.prefeitura.sp.gov.br/_layouts/PPT/Exportacao/RelatorioServidores.aspx?Filters=;0;;0;1;0;0;0&ExportType=xls" -o RelatorioServidores.xls
 cat RelatorioServidores.xls \
   | iconv -f ISO_8859-1 -t UTF8 \
   | sed -r 's/^\s+//;s/\s+$//' \
@@ -15,5 +14,6 @@ cat RelatorioServidores.xls \
   | sed -ru 's/^\s*<td[^>]*>\s*//g;s/<\/td>\s*$//g'  \
   | sed 's/\.//g;s/,/\./g' \
   | awk -F ';' '{print $1";"$2";"$3";"$4";"$5";"$6";"$7";"$8";"$9" "$10", "$11";"$12";"$13}' \
-  | perl -pe 'chomp if eof' - >! RelatorioServidores.csv
-
+  | perl -pe 'chomp if eof' - >! gerado/RelatorioServidores.csv
+rm gerado/RelatorioServidores.db
+python csv2sqlite.py
