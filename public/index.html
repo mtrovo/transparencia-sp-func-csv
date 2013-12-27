@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Graph</title>
+
+	<link href="http://nvd3.org/css/bootstrap.css" rel="stylesheet">
+	<link rel="stylesheet" href="http://nvd3.org/src/nv.d3.css">
+
+	<script src="http://nvd3.org/lib/d3.v2.js"></script>
+	<script src="http://nvd3.org/nv.d3.js"></script>
+	<script src="http://nvd3.org/js/lib/jquery.min.js"></script>
+
+  <link href='http://fonts.googleapis.com/css?family=Alegreya+Sans:100,400' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" href="app.css">
+<style>
+	
+	#main-chart svg{
+		height:100px;
+		width:100px;
+		display:inline;
+	}
+	</style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Retirada de dados
+        <small>Número de funcionários que pediram retirada de dados</small>
+      </h1>
+    </div>
+  	<div id="main-chart">
+  	</div>
+  </div>
+	<script>
+	function data_for(json) {
+		return [{
+			'key': json.unidade,
+			'values': [
+			{'label': 'Com dados', 'value': json.com_dados},
+			{'label': 'Sem dados', 'value': json.sem_dados}
+			]
+		}];
+	}
+
+
+	$(function(){
+    $.getJSON('/optout.json',function(json) {
+
+			var container=$('#main-chart');
+      $.each(json, function(idx) {
+        var div=$('<div>').appendTo(container);
+        var $this=this;
+				nv.addGraph(function() {
+					var chart = nv.models.pieChart()
+					.margin({top: 5,
+						right: 5,
+						bottom: 5,
+						left: 5})
+					.x(function(d) { return d.label })
+          .y(function(d) { return d.value })
+          .color(['#9ce', '#f98'])
+					.showLabels(false)
+					.showLegend(false)
+					.labelThreshold(.05)
+					.donut(true);
+
+					div.append($('<svg xmlns="http://www.w3.org/2000/svg"></svg>').attr('id', 'svg_'+idx));
+          $('<h2>').text($this.unidade).appendTo(div);
+					d3.select('#svg_'+idx)
+					.datum(data_for($this))
+					.transition().duration(5000)
+					.call(chart);
+
+					return chart;
+				});
+			});
+
+		});
+	});
+
+
+	</script>
+	<script src="http://nvd3.org/js/lib/bootstrap.min.js"></script>
+</body>
+</html>
